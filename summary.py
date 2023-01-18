@@ -12,11 +12,13 @@ if __name__ == "__main__":
     num_classes = 7
     backbone = "xception"
 
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model = DeepLab(num_classes=num_classes, 
-                    backbone=backbone, 
-                    pretrained=False, 
-                    downsample_factor=8).to(device)
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    model = DeepLab(
+        num_classes=num_classes,
+        backbone=backbone,
+        pretrained=False,
+        downsample_factor=8,
+    ).to(device)
     summary(model, (3, input_shape[0], input_shape[1]))
 
     dummy_input = torch.randn(1, 3, input_shape[0], input_shape[1]).to(device)
@@ -29,5 +31,5 @@ if __name__ == "__main__":
     # --------------------------------------------------------#
     flops = flops * 2
     flops, params = clever_format([flops, params], "%.3f")
-    print('Total GFLOPS: %s' % (flops))
-    print('Total params: %s' % (params))
+    print("Total GFLOPS: %s" % (flops))
+    print("Total params: %s" % (params))

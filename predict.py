@@ -29,7 +29,7 @@ def main():
     #
     #   count、name_classes仅在mode='predict'时有效
     # -------------------------------------------------------------------------#
-    count = False
+    count = True
     name_classes = ["Background_waterbody", 
                     "Human_divers", 
                     "Wrecks_and_ruins",
