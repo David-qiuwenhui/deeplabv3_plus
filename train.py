@@ -552,7 +552,9 @@ def parse_args():
         description="pytorch deeplabv3plus(xception) training"
     )
     # 模型和训练的参数
-    parser.add_argument("--data-path", default="../../dataset/SUIMdevkit", help="dataset root")
+    parser.add_argument(
+        "--data-path", default="../../dataset/SUIMdevkit", help="dataset root"
+    )
     parser.add_argument(
         "--model-path",
         default="",
