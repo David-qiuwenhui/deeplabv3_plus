@@ -7,8 +7,11 @@ img_out/
 miou_out_train/
 miou_out_val/
 miou_out_*/
+train_img*/
+val_img*/
+version*/
 
-# ingore model weights 
+# ingore model weights
 model_data/
 *.pth
 

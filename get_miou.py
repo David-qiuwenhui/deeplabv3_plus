@@ -42,14 +42,14 @@ def main():
 
     image_ids = (
         open(
-            os.path.join(SUIMdevkit_path, "SUIM2022/ImageSets/Segmentation/train.txt"),
+            os.path.join(SUIMdevkit_path, "SUIM2022/ImageSets/Segmentation/val.txt"),
             "r",
         )
         .read()
         .splitlines()
     )
     gt_dir = os.path.join(SUIMdevkit_path, "SUIM2022/SegmentationClass/")
-    miou_out_path = "miou_out_train"
+    miou_out_path = "miou_out_val"
     pred_dir = os.path.join(miou_out_path, "detection-results")
 
     if miou_mode == 0 or miou_mode == 1:

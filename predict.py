@@ -22,7 +22,7 @@ def main():
     #   'dir_predict'       表示遍历文件夹进行检测并保存。默认遍历img文件夹，保存img_out文件夹，详情查看下方注释。
     #   'export_onnx'       表示将模型导出为onnx，需要pytorch1.7.1以上。
     # ----------------------------------------------------------------------------------------------------------#
-    mode = "fps"
+    mode = "dir_predict"
     # -------------------------------------------------------------------------#
     #   count               指定了是否进行目标的像素点计数（即面积）与比例计算
     #   name_classes        区分的种类，和json_to_dataset里面的一样，用于打印种类和数量
@@ -30,13 +30,15 @@ def main():
     #   count、name_classes仅在mode='predict'时有效
     # -------------------------------------------------------------------------#
     count = True
-    name_classes = ["Background_waterbody", 
-                    "Human_divers", 
-                    "Wrecks_and_ruins",
-                    "Robots", 
-                    "Reefs_and_invertebrates",
-                    "Fish_and_vertebrates", 
-                    "sea_floor_and_rocks"]
+    name_classes = [
+        "Background_waterbody",
+        "Human_divers",
+        "Wrecks_and_ruins",
+        "Robots",
+        "Reefs_and_invertebrates",
+        "Fish_and_vertebrates",
+        "sea_floor_and_rocks",
+    ]
     # ----------------------------------------------------------------------------------------------------------#
     #   video_path          用于指定视频的路径，当video_path=0时表示检测摄像头
     #                       想要检测视频，则设置如video_path = "xxx.mp4"即可，代表读取出根目录下的xxx.mp4文件。
@@ -53,7 +55,7 @@ def main():
     # ----------------------------------------------------------------------------------------------------------#
     #   test_interval       用于指定测量fps的时候，图片检测的次数。理论上test_interval越大，fps越准确。
     #   fps_image_path      用于指定测试的fps图片
-    #   
+    #
     #   test_interval和fps_image_path仅在mode='fps'有效
     # ----------------------------------------------------------------------------------------------------------#
     test_interval = 1000
@@ -61,11 +63,12 @@ def main():
     # -------------------------------------------------------------------------#
     #   dir_origin_path     指定了用于检测的图片的文件夹路径
     #   dir_save_path       指定了检测完图片的保存路径
-    #   
+    #
     #   dir_origin_path和dir_save_path仅在mode='dir_predict'时有效
     # -------------------------------------------------------------------------#
-    dir_origin_path = "img/"
-    dir_save_path = "img_out/"
+    dir_origin_path = "../version2_img_new/"
+    dir_save_path = "version2_img_new_mask/"
+    save_file_type = "png"
     # -------------------------------------------------------------------------#
     #   simplify            使用Simplify onnx
     #   onnx_save_path      指定了onnx的保存路径
@@ -74,7 +77,7 @@ def main():
     onnx_save_path = "model_data/models.onnx"
 
     if mode == "predict":
-        '''
+        """
         predict.py有几个注意点
         1、该代码无法直接进行批量预测，如果想要批量预测，可以利用os.listdir()遍历文件夹，利用Image.open打开图片文件进行预测。
         具体流程可以参考get_miou_prediction.py，在get_miou_prediction.py即实现了遍历。
@@ -86,7 +89,7 @@ def main():
             seg_img[:, :, 0] += ((pr == c)*( self.colors[c][0] )).astype('uint8')
             seg_img[:, :, 1] += ((pr == c)*( self.colors[c][1] )).astype('uint8')
             seg_img[:, :, 2] += ((pr == c)*( self.colors[c][2] )).astype('uint8')
-        '''
+        """
         img = "./img/f_r_1340_.jpg"
         image = Image.open(img)
         r_image = deeplab.detect_image(image, count=count, name_classes=name_classes)
@@ -96,8 +99,11 @@ def main():
     elif mode == "video":
         capture = cv2.VideoCapture(video_path)
         if video_save_path != "":
-            fourcc = cv2.VideoWriter_fourcc(*'XVID')
-            size = (int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)), int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)))
+            fourcc = cv2.VideoWriter_fourcc(*"XVID")
+            size = (
+                int(capture.get(cv2.CAP_PROP_FRAME_WIDTH)),
+                int(capture.get(cv2.CAP_PROP_FRAME_HEIGHT)),
+            )
             out = cv2.VideoWriter(video_save_path, fourcc, video_fps, size)
 
         ref, frame = capture.read()
@@ -105,7 +111,7 @@ def main():
             raise ValueError("未能正确读取摄像头（视频），请注意是否正确安装摄像头（是否正确填写视频路径）。")
 
         fps = 0.0
-        while (True):
+        while True:
             t1 = time.time()
             # 读取某一帧
             ref, frame = capture.read()
@@ -120,12 +126,20 @@ def main():
             # RGBtoBGR满足opencv显示格式
             frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
 
-            fps = (fps + (1. / (time.time() - t1))) / 2
+            fps = (fps + (1.0 / (time.time() - t1))) / 2
             print("fps= %.2f" % (fps))
-            frame = cv2.putText(frame, "fps= %.2f" % (fps), (0, 40), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
+            frame = cv2.putText(
+                frame,
+                "fps= %.2f" % (fps),
+                (0, 40),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                1,
+                (0, 255, 0),
+                2,
+            )
 
             # cv2.imshow("video", frame)
-            c = cv2.waitKey(1) & 0xff
+            c = cv2.waitKey(1) & 0xFF
             if video_save_path != "":
                 out.write(frame)
 
@@ -142,7 +156,7 @@ def main():
     elif mode == "fps":
         img = Image.open(fps_image_path)
         tact_time = deeplab.get_FPS(img, test_interval)
-        print(str(tact_time) + ' seconds, ' + str(1 / tact_time) + 'FPS, @batch_size 1')
+        print(str(tact_time) + " seconds, " + str(1 / tact_time) + "FPS, @batch_size 1")
 
     elif mode == "dir_predict":
         import os
@@ -151,20 +165,40 @@ def main():
         img_names = os.listdir(dir_origin_path)
         for img_name in tqdm(img_names):
             if img_name.lower().endswith(
-                    ('.bmp', '.dib', '.png', '.jpg', '.jpeg', '.pbm', '.pgm', '.ppm', '.tif', '.tiff')):
+                (
+                    ".bmp",
+                    ".dib",
+                    ".png",
+                    ".jpg",
+                    ".jpeg",
+                    ".pbm",
+                    ".pgm",
+                    ".ppm",
+                    ".tif",
+                    ".tiff",
+                )
+            ):
                 image_path = os.path.join(dir_origin_path, img_name)
                 image = Image.open(image_path)
                 r_image = deeplab.detect_image(image)
                 if not os.path.exists(dir_save_path):
                     os.makedirs(dir_save_path)
-                r_image.save(os.path.join(dir_save_path, img_name))
-                
+
+                if save_file_type == "png":
+                    r_image.save(
+                        os.path.join(dir_save_path, img_name.split(".")[0] + ".png")
+                    )
+                else:
+                    r_image.save(os.path.join(dir_save_path, img_name))
+
     elif mode == "export_onnx":
         deeplab.convert_to_onnx(simplify, onnx_save_path)
 
     else:
-        raise AssertionError("Please specify the correct mode: 'predict', 'video', 'fps' or 'dir_predict'.")
+        raise AssertionError(
+            "Please specify the correct mode: 'predict', 'video', 'fps' or 'dir_predict'."
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
